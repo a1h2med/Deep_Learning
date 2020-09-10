@@ -1,3 +1,23 @@
+# ToDo: make it global
+"""
+this project intends to color the text of transistors in an analog circuit.
+to perform such a method I've used open-cv with OCR.
+first I've used open-cv deep learning paper (Natural scene text understanding) by Céline Mancas-Thillou, Bernard Gosselin.
+which showed great success in text localization.
+So I'm using it, and I've followed this tutorial with some edits, to fit my project.
+to make it happens (https://www.pyimagesearch.com/2018/08/20/opencv-text-detection-east-text-detector/) (I'm c++ fan ^_^).
+after localizing the text, I've performed OCR to detect the words.
+If i've used OCR on its own, it should great failure in noisy image, thats why I've preferred to use EAST with it.
+
+features:
+    1- you can select whatever the transistor you like from a drop down list.
+    2- transistor selected will be colored.
+    3- simple GUI.
+
+limitations:
+    1- if there were many words, or complex structure, it will fail detecting the right place, and words.
+"""
+
 from PySide2.QtWidgets import QApplication, QDialog, QVBoxLayout, QLabel, QComboBox
 import sys
 from PySide2.QtGui import QPixmap
@@ -8,10 +28,10 @@ import cv2
 
 
 def decode_predictions(scores, geometry):
-    # grab the number of rows and columns from the scores volume, then
-    # initialize our set of bounding box rectangles and corresponding
-    # confidence scores
+    # get the number of rows and columns from the scores.
     (numRows, numCols) = scores.shape[2:4]
+    # initialize set of bounding box rectangles and corresponding
+    # confidence scores
     rects = []
     confidences = []
 
@@ -65,8 +85,9 @@ def decode_predictions(scores, geometry):
     # return a tuple of the bounding boxes and associated confidences
     return (rects, confidences)
 
-
+# input image
 image = cv2.imread("images/Try.PNG")
+# make a copy and get its shape
 orig = image.copy()
 (origH, origW) = image.shape[:2]
 
@@ -87,9 +108,6 @@ layerNames = [
     "feature_fusion/Conv_7/Sigmoid",
     "feature_fusion/concat_3"]
 
-# load the pre-trained EAST text detector
-print("[INFO] loading EAST text detector...")
-# net = cv2.dnn.readNet(args["east"])
 net = cv2.dnn.readNet("frozen_east_text_detection.pb")
 
 # construct a blob from the image and then perform a forward pass of
@@ -99,6 +117,7 @@ blob = cv2.dnn.blobFromImage(image, 1.0, (W, H),
 net.setInput(blob)
 (scores, geometry) = net.forward(layerNames)
 
+# We used non-maxima suppression as the NMS provided by Python open-cv doesn't work (with me at least).
 # decode the predictions, then  apply non-maxima suppression to
 # suppress weak, overlapping bounding boxes
 (rects, confidences) = decode_predictions(scores, geometry)
@@ -108,7 +127,6 @@ boxes = non_max_suppression(np.array(rects), probs=confidences)
 results = []
 
 # loop over the bounding boxes
-
 for (startX, startY, endX, endY) in boxes:
     # scale the bounding box coordinates based on the respective
     # ratios
@@ -147,20 +165,20 @@ for (startX, startY, endX, endY) in boxes:
 # sort the results bounding box coordinates from top to bottom
 results = sorted(results, key=lambda r: r[0][1])
 
-# loop over the results
+
 output = orig.copy()
 
-
+# loop over the results
 def drawRectAndColoring(selecteditem):
     for ((startX, startY, endX, endY), text) in results:
         text = "".join([c if ord(c) < 128 else "" for c in text]).strip()
-        print(text)
         if text == selecteditem:
             cv2.rectangle(output, (startX, startY), (endX, endY),
                           (0, 0, 255), 2)
             cv2.putText(output, text, (startX + 2, endY - 2),
                         cv2.FONT_HERSHEY_SIMPLEX, .6, (0, 0, 255), 2)
 
+# main layout
 class Window(QDialog):
     def __init__(self):
         super().__init__()
@@ -170,16 +188,28 @@ class Window(QDialog):
     def InitWindow(self):
         self.setWindowTitle(self.title)
         vbox = QVBoxLayout()
+
+        # make a label to let the user know what is he/she using.
         self.labelImage = QLabel(self)
-        self.label_text = QLabel("Test")
+        self.label_text = QLabel("Select Your Transistor")
+
+        # add image to the label, so the user can see it.
         self.pixmap = QPixmap("Try.PNG")
         self.labelImage.setPixmap(self.pixmap)
+
+        # make a drop down list, add names to it.
         self.box = QComboBox()
+        self.box.addItem("M1")
         self.box.addItem("M2")
         self.box.addItem("M3")
         self.box.addItem("M4")
         self.box.addItem("M5")
+        self.box.addItem("M6")
+
+        # on selection, call the function.
         self.box.currentTextChanged.connect(self.getText)
+
+        # add widgets, and set the layout.
         vbox.addWidget(self.label_text)
         vbox.addWidget(self.box)
         vbox.addWidget(self.labelImage)
@@ -187,9 +217,13 @@ class Window(QDialog):
         self.show()
 
     def getText(self, i):
-        # ToDo: Add M1, M6
+        # I've needed to pass certain names whenever the user selects an item,
+        # so I can highlight the selected item only.
         global output
-        if i == "M2":
+        if i == "M1":
+            drawRectAndColoring("Fa iita uM")
+            drawRectAndColoring("=|")
+        elif i == "M2":
             drawRectAndColoring("M2a")
             drawRectAndColoring("M2b")
         elif i == "M3":
@@ -201,6 +235,10 @@ class Window(QDialog):
         elif i == "M5":
             drawRectAndColoring("M5e")
             drawRectAndColoring("M5b")
+        elif i == "M6":
+            drawRectAndColoring("Vem")
+
+        # After colorization, I'll save the output produced, so I can embed it in another layout.
         cv2.imwrite("Text Detection.PNG", output)
         self.w = SecondWindow()
         self.w.show()
