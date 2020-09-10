@@ -1,12 +1,12 @@
 # Smart-Schematic
-this project intends to color the text of transistors in an analog circuit.
-to perform such a method I've used open-cv with OCR.
-first I've used open-cv deep learning paper (Natural scene text understanding) by Céline Mancas-Thillou, Bernard Gosselin.
-which showed great success in text localization.
-So I'm using it, and I've followed this tutorial with some edits, to fit my project.
-to make it happens (https://www.pyimagesearch.com/2018/08/20/opencv-text-detection-east-text-detector/) (I'm c++ fan ^_^).
-after localizing the text, I've performed OCR to detect the words.
-If i've used OCR on its own, it should great failure in noisy image, thats why I've preferred to use EAST with it.
+this project intends to color the text of transistors in an analog circuit.  
+to perform such a method I've used open-cv with OCR.  
+first I've used open-cv deep learning paper (Natural scene text understanding) by Céline Mancas-Thillou, Bernard Gosselin.  
+which showed great success in text localization.  
+So I'm using it, and I've followed this tutorial with some edits, to fit my project.  
+to make it happens (https://www.pyimagesearch.com/2018/08/20/opencv-text-detection-east-text-detector/) (I'm c++ fan ^_^).  
+after localizing the text, I've performed OCR to detect the words.  
+If i've used OCR on its own, it should great failure in noisy image, thats why I've preferred to use EAST with it.  
 
 ## Table of contents:
 * [Application](#system-layout).  
