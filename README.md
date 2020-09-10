@@ -21,13 +21,13 @@ System layout
 Output  
 ![out](https://user-images.githubusercontent.com/31229408/92678242-d7517200-f325-11ea-9e67-149eae6a0619.PNG)  
 
-##Features:
+## Features:
 
     1- you can select whatever the transistor you like from a drop down list.  
     2- transistor selected will be colored.  
     3- simple GUI.  
 
-##Limitations:
+## Limitations:
 
     1- if there were many words, or complex structure, it will fail detecting the right place, and words.  
 
