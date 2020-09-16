@@ -8,7 +8,7 @@ So I'm using it, and I've followed this tutorial with some edits, to fit my proj
 to make it happens (https://www.pyimagesearch.com/2018/08/20/opencv-text-detection-east-text-detector/) (I'm c++ fan ^_^).
 after localizing the text, I've performed OCR to detect the words.
 If i've used OCR on its own, it should great failure in noisy image, thats why I've preferred to use EAST with it.
-
+*** I've made some changes to make a better localization, detection. it still have very small errors.
 features:
     1- you can select whatever the transistor you like from a drop down list.
     2- transistor selected will be colored.
@@ -49,9 +49,8 @@ def decode_predictions(scores, geometry):
 
         # loop over the number of columns
         for x in range(0, numCols):
-            # if our score does not have sufficient probability,
-            # ignore it
-            #            if scoresData[x] < args["min_confidence"]:
+            # if our score does not have sufficient probability, ignore it
+            # if scoresData[x] < args["min_confidence"]:
             if scoresData[x] < 0.5:
                 continue
 
@@ -85,6 +84,7 @@ def decode_predictions(scores, geometry):
     # return a tuple of the bounding boxes and associated confidences
     return (rects, confidences)
 
+
 # input image
 image = cv2.imread("images/Try.PNG")
 # make a copy and get its shape
@@ -93,7 +93,7 @@ orig = image.copy()
 
 # set the new width and height and then determine the ratio in change
 # for both the width and height
-(newW, newH) = (320, 320)
+(newW, newH) = (32 * 20, 32 * 20)
 rW = origW / float(newW)
 rH = origH / float(newH)
 
@@ -138,8 +138,8 @@ for (startX, startY, endX, endY) in boxes:
     # in order to obtain a better OCR of the text we can potentially
     # apply a bit of padding surrounding the bounding box -- here we
     # are computing the deltas in both the x and y directions
-    dX = int((endX - startX) * 0.05)
-    dY = int((endY - startY) * 0.05)
+    dX = int((endX - startX) * 0.1)
+    dY = int((endY - startY) * 0.1)
 
     # apply padding to each side of the bounding box, respectively
     startX = max(0, startX - dX)
@@ -165,18 +165,23 @@ for (startX, startY, endX, endY) in boxes:
 # sort the results bounding box coordinates from top to bottom
 results = sorted(results, key=lambda r: r[0][1])
 
-
 output = orig.copy()
+
 
 # loop over the results
 def drawRectAndColoring(selecteditem):
     for ((startX, startY, endX, endY), text) in results:
         text = "".join([c if ord(c) < 128 else "" for c in text]).strip()
         if text == selecteditem:
+            if selecteditem == "Faiviia wv":
+                text = "M1a"
+            elif selecteditem == "la mibpo V,":
+                text = "M2a"
             cv2.rectangle(output, (startX, startY), (endX, endY),
                           (0, 0, 255), 2)
             cv2.putText(output, text, (startX + 2, endY - 2),
                         cv2.FONT_HERSHEY_SIMPLEX, .6, (0, 0, 255), 2)
+
 
 # main layout
 class Window(QDialog):
@@ -221,22 +226,22 @@ class Window(QDialog):
         # so I can highlight the selected item only.
         global output
         if i == "M1":
-            drawRectAndColoring("Fa iita uM")
-            drawRectAndColoring("=|")
+            drawRectAndColoring("Faiviia wv")
+            drawRectAndColoring("la mibpo V,")
         elif i == "M2":
-            drawRectAndColoring("M2a")
+            drawRectAndColoring("M2a_")
             drawRectAndColoring("M2b")
         elif i == "M3":
-            drawRectAndColoring("M3a")
+            drawRectAndColoring("M3a _")
             drawRectAndColoring("M3b")
         elif i == "M4":
-            drawRectAndColoring("Mda")
+            drawRectAndColoring("M4a")
             drawRectAndColoring("M4b")
         elif i == "M5":
-            drawRectAndColoring("M5e")
+            drawRectAndColoring("M5a")
             drawRectAndColoring("M5b")
         elif i == "M6":
-            drawRectAndColoring("Vem")
+            drawRectAndColoring("M6")
 
         # After colorization, I'll save the output produced, so I can embed it in another layout.
         cv2.imwrite("Text Detection.PNG", output)
@@ -260,7 +265,6 @@ class SecondWindow(QDialog):
         vbox.addWidget(labelImage)
         self.setLayout(vbox)
         self.show()
-
 
 
 if __name__ == '__main__':
